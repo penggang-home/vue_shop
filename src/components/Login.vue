@@ -62,7 +62,7 @@ export default {
         // 1.2 需要注意的是 await只能用在被async修饰的方法中(把紧挨着await的方法添加修饰符 async)
         // 1.3 解构赋值 把右边Promise返回值的data对象赋值给res  {config:res}这样是把返回值里边的config赋值给res
         const {data:res} = await this.$http.post('login',this.loginForm)
-        console.log(res);
+        // console.log(res);
         if(res.meta.status !== 200) return this.$message.error({
           duration:1500,
           message:'登录失败：'+res.meta.msg
