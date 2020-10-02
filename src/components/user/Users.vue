@@ -303,24 +303,20 @@ export default {
         return this.$message.error("获取用户列表失败:" + res.meta.msg);
       this.userList = res.data.users;
       this.total = res.data.total;
-      console.log(res);
     },
     // 监听pagesize 改变的事件
     handleSizeChange(newSize) {
-      console.log(newSize);
       this.queryInfo.pagesize = newSize;
       // 更新queryInfo配置 重新发起数据请求
       this.getUserList();
     },
     // 监听页码值改变的事件
     handleCurrentChange(newPage) {
-      console.log(newPage);
       this.queryInfo.pagenum = newPage;
       this.getUserList();
     },
     // 监听switch开关的改变
     async userStateChanged(userInfo) {
-      console.log(userInfo);
       const { data: res } = await this.$http.put(
         `users/${userInfo.id}/state/${userInfo.mg_state}`
       );
