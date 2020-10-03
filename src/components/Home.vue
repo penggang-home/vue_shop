@@ -81,7 +81,8 @@ export default {
   methods: {
     // 退出
     logout() {
-      window.sessionStorage.removeItem("token");
+      // window.sessionStorage.removeItem("token");
+      window.sessionStorage.clear();
       this.$router.push("/login");
       this.$message.success({
         center: true, //文字和图标居中
