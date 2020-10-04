@@ -11,6 +11,7 @@ const Users = () => import('components/user/Users.vue')
 const Rights = () => import('components/power/Rights.vue')
 const Roles = () => import('components/power/Roles.vue')
 const Cate = () => import('components/goods/Cate.vue')
+const Params = () => import('components/goods/Params.vue')
 
 
 const routes = [
@@ -46,6 +47,10 @@ const routes = [
       {
         path:'/categories',
         component:Cate
+      },
+      {
+        path:'/params',
+        component:Params
       }
     ]
   },
@@ -58,7 +63,6 @@ const router = new VueRouter({
 })
 
 // 挂载路由导航守卫
-
 router.beforeEach((to, from, next) => {
   // from 从哪儿来
   // to 到哪儿去
@@ -67,8 +71,8 @@ router.beforeEach((to, from, next) => {
   if(to.path === '/login')return next()
   // 获取token
   const tokenStr = window.sessionStorage.getItem('token')
+  // 没有token 强制跳转到登录页面
   if(!tokenStr){
-    // console.log(Vue.prototype.$message);
     Vue.prototype.$message('请登录')
     return next('/login') 
   }
