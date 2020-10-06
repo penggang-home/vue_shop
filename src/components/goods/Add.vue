@@ -14,15 +14,15 @@
       <el-alert title="添加商品信息" :closable="false"	 type="info" center show-icon> </el-alert>
 
       <!-- 步骤条 -->
-      <el-steps  :active="activeIndex * 1" finish-status="success" align-center>
-        <el-step title="基本信息"></el-step>
-        <el-step title="商品参数"></el-step>
-        <el-step title="商品属性"></el-step>
-        <el-step title="商品图片"></el-step>
-        <el-step title="商品内容"></el-step>
-        <el-step title="完成"></el-step>
+      <el-steps  :active="activeIndex * 1" finish-status="success" process-status="process"  >
+        <!-- 	wait / process / finish / error / success -->
+        <el-step title="基本信息" icon="el-icon-edit"></el-step>
+        <el-step title="商品参数" icon="el-icon-document"></el-step>
+        <el-step title="商品属性" icon="el-icon-document-copy"></el-step>
+        <el-step title="商品图片" icon="el-icon-picture"></el-step>
+        <el-step title="商品内容" icon="el-icon-reading"></el-step>
+        <el-step title="完成" icon="el-icon-circle-check"></el-step>
       </el-steps>
-
       
       <!-- tab 栏区域 -->
       <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="100px" label-position="top">
@@ -134,7 +134,7 @@ export default {
           { required:true,message:'请输入商品数量',trigger:'blur'}
         ],
         goods_cat:[
-          { required:true,message:'请选择商品分类',trigger:'blur'}
+          { required:true,message:'请选择商品分类',trigger:['change','blur']}
         ]
       },
       // 商品分类列表
@@ -186,36 +186,63 @@ export default {
     },
     // 切换标签页时触发该函数
     beforeTabLeave(toActiveName,oldActiveName){
+
       // console.log(toActiveName,oldActiveName);
-      if(oldActiveName === '0' && this.addForm.goods_cat.length !== 3){
-        this.$message.error('请先选择商品分类！')
+      // if(oldActiveName === '0' && this.addForm.goods_cat.length !== 3){
+      //   this.$message.error('请先填写基本信息！')
+      //   return false
+      // }
+
+      // 需要校验的 数组 or 字符串
+      const RulesArr =  Object.keys(this.addFormRules)
+      let arrErrorInfo = []
+
+      //  校验通过errorInfo为空，校验不通过为指定的验证规则 message
+      this.$refs.addFormRef.validateField(RulesArr,(errorInfo) => {
+        if(errorInfo){
+          arrErrorInfo.push(errorInfo)
+        }
+      })
+
+      if(arrErrorInfo.length !== 0){
+        this.$message.error(arrErrorInfo[0])
         return false
+      }else{
+        return true
       }
     },
-    // tab 被选中时触发
-    async tabClicked(){
-      // console.log(this.activeIndex)
+    // 获取动态参数数据
+    async getManyTableData(){
+      const {data:res} = await this.$http.get(`categories/${this.cateId}/attributes`,{params:{sel:'many'}})
 
+      if(res.meta.status !== 200 ){
+        return this.$message.error('获取动态参数失败：'+res.meta.msg)
+      }
+      
+      res.data.forEach(item => {
+        item.attr_vals = item.attr_vals.length === 0 ? [] : item.attr_vals.split(',')
+      })
+      
+      this.manyTableData = res.data
+    },
+    // 获取静态属性参数
+    async getOnlyTableData(){
+      const {data:res} = await this.$http.get(`categories/${this.cateId}/attributes`,{params:{sel:'only'}})
+
+      if(res.meta.status !== 200 ){
+        return this.$message.error('获取静态属性失败：'+res.meta.msg)
+      }
+
+      this.onlyTableData = res.data
+    },
+    // tab 被选中时触发
+    tabClicked(){
       // 访问的是商品参数(动态参数)面板
       if(this.activeIndex === '1'){
-        const {data:res} = await this.$http.get(`categories/${this.cateId}/attributes`,{params:{sel:'many'}})
-
-        if(res.meta.status !== 200 ){
-          return this.$message.error('获取动态参数失败：'+res.meta.msg)
-        }
-        
-        res.data.forEach(item => {
-          item.attr_vals = item.attr_vals.length === 0 ? [] : item.attr_vals.split(',')
-        })
-        this.manyTableData = res.data
+        this.getManyTableData()
+        console.log(this.manyTableData);
       }else if(this.activeIndex === '2'){
-        const {data:res} = await this.$http.get(`categories/${this.cateId}/attributes`,{params:{sel:'only'}})
-
-        if(res.meta.status !== 200 ){
-          return this.$message.error('获取静态属性失败：'+res.meta.msg)
-        }
-
-        this.onlyTableData = res.data
+        this.getOnlyTableData()
       }
     },
     // 处理图片预览效果
@@ -254,11 +281,15 @@ export default {
     },
     // 添加商品
     add(){
-      this.$refs.addFormRef.validate(async valid => {
+      // valid是否通过验证 obj未通过验证规则的对象
+      this.$refs.addFormRef.validate(async (valid,obj) => {
         // 未通过表单预验证
         if(!valid){
-          this.$message.error('请填写必要的表单项!')
-          return
+          // console.log(obj);
+          // 把未通过验证规则的对象的值提取出来 再提取值的验证规则message
+          let arr =  Object.values(obj)
+          let errorInfo = arr[0][0].message
+          return this.$message.error(errorInfo)
         }
 
         // 执行添加的业务逻辑
@@ -298,7 +329,7 @@ export default {
 
         this.$router.push('/goods')
       })
-    }
+    },
   },
   computed: {
     cateId(){
