@@ -37,9 +37,9 @@
               </el-col>
               <el-col :span="19">
                 <!-- 通过for循环嵌套渲染二级、三级权限 -->
-                <el-row
+                <el-row 
                   :class="['vcenter', index !== 0 ? 'bd-top' : '']"
-                  v-for="(item2, index) in item1.children"
+                  v-for="item2 in item1.children"
                   :key="item2.id"
                 >
                   <!-- 渲染二级权限-->
