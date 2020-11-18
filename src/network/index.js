@@ -13,6 +13,7 @@ axios.defaults.baseURL = `http://120.53.120.229:8888/api/private/v1/`
 axios.interceptors.request.use(config => {
   // 添加 进度条
   NProgress.start()
+
   // 添加请求头
   config.headers.Authorization = window.sessionStorage.getItem('token')
 

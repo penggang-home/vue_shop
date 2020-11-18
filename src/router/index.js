@@ -61,10 +61,11 @@ router.beforeEach((to, from, next) => {
   // from 从哪儿来
   // to 到哪儿去
   // 放行函数  next()放行   next('/login')强制跳转
-  
   if(to.path === '/login')return next()
+
   // 获取token
   const tokenStr = window.sessionStorage.getItem('token')
+
   // 没有token 强制跳转到登录页面
   if(!tokenStr){
     Vue.prototype.$message('请登录')
